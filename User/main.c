@@ -8,6 +8,7 @@
 #include "./MALLOC/malloc.h"
 #include "./BSP/TIMER/btim.h"
 #include "./BSP/TOUCH/touch.h"
+#include "./BSP/ws2812/ws2812.h"
 
 /* LVGL */
 #include "lvgl.h"
@@ -15,7 +16,7 @@
 #include "lv_port_disp_template.h"
 #include "lv_demo_stress.h"
 #include "ui.h"
-
+#include "ui_led.h"
 
 int main(void)
 {
@@ -30,13 +31,17 @@ int main(void)
     my_mem_init(SRAMIN);                /* 初始化内部SRAM内存池 */
     tp_dev.init();                      /* 触摸屏初始化 */
     btim_timx_int_init(10-1,7200-1);    /* 初始化定时器 */
+	
+	WS2812B_Init();
 
     lv_init();                          /* lvgl系统初始化 */
     lv_port_disp_init();                /* lvgl显示接口初始化,放在lv_init()的后面 */
     lv_port_indev_init();               /* lvgl输入接口初始化,放在lv_init()的后面 */
     
     //lv_demo_stress();                   /* lvgl官方例程 */
-	  ui_init();
+	//ui_init();
+	ui_led_start();
+	
     while(1)
     {
         lv_task_handler();

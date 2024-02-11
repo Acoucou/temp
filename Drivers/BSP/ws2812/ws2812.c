@@ -1,243 +1,266 @@
-/*----------------------------------------------------------------------------   
- * 项目名称:
 
-     RGB LED驱动程序
-
- * 功能描述:
-
-     1、将整个数组的数据发送得到LED进行显示
-	 2、从指定像素开始将整个数组的数据发送到LED显示
-	 3、发送复位信号
-
- * 版权信息:
-
-     (c) 飞翼电子, 2014.
-
- * 历史版本:
-     2014-03-15:
-       - 初始版本 V1.0.0;
-
- * 配置说明:
-     MCU:             STC15W204S
-     晶振:      	  内部晶振：33MHz
-     扩展模块:  	  -
-     软件:            Keil.C51.V9.01
-
- * 备注:
-
-------------------------------------------------------------------------------*/   
-
-#include "STC15W.h"
-#include <intrins.h>
 #include "ws2812.h"
 
-//-------------------------------------------------------------------------------
-//子程序名称:IO_Init(void)
-//功能：端口初始化
-//-------------------------------------------------------------------------------
-void IO_Init(void)
+#define PIXEL_MAX 7
+
+void Send_8bits(uint8_t dat) 
 {
-	;
+  uint8_t i=0;
+  static uint8_t CodeOne=0x7c;//7c，3e
+  static uint8_t CodeZero=0x70;//70,38
+  
+  for (i=0;i<8;i++)
+  {
+    if((dat & 0x80)==0x80)
+    {
+      HAL_SPI_Transmit_DMA(&hspi1, &CodeOne, 1);
+    }
+    else
+    {
+      HAL_SPI_Transmit_DMA(&hspi1, &CodeZero, 1); 
+    }
+    dat=dat<<1;
+  }
+}
+//G--R--B
+//MSB first	
+void Send_2811_24bits(uint8_t RData,uint8_t GData,uint8_t BData)
+{   
+  Send_8bits(GData);  
+  Send_8bits(RData); 
+  Send_8bits(BData);
+} 
+
+void PixelUpdate(void)//should >24us
+{
+  uint8_t rst[24]={0};
+  HAL_SPI_Transmit_DMA(&hspi1, rst, 24);
 }
 
-//-------------------------------------------------------------------------------
-//子程序名称:ResetDateFlow(void)
-//功能：复位，为下一次发送做准备，
-//说明：将DI置位为0后，延时约65us
-//-------------------------------------------------------------------------------
-void ResetDataFlow(void)
+void WS2812B_Init(void)//should >50us
 {
-	unsigned char i,j;
-	DI=0;					//DI置为0后，延时50us以上，实现帧复位
-	for(i=0;i<15;i++)		//此处33Mhz时延时65us
-	{
-		for(j=0;j<20;j++)
-		{
-			;
-		}
-	}
-}
-//-------------------------------------------------------------------------------
-//子程序名称:SendOnePix(unsigned char *ptr)
-//功能：发送一个像素点的24bit数据
-//参数：接收的参数是一个指针，此函数会将此指针指向的地址的连续的三个Byte的数据发送
-//说明：在主函数中直接调用此函数时，在整个帧发送开始前需要先执行 ResetDataFlow()
-//		数据是按归零码的方式发送，速率为800KBPS
-//-------------------------------------------------------------------------------
-void SendOnePix(unsigned char *ptr)
-{
-	unsigned char i,j;
-	unsigned char temp;
-
-	for(j=0;j<3;j++)
-	{
-		temp=ptr[j];
-		for(i=0;i<8;i++)
-		{
-			if(temp&0x80)		 //从高位开始发送
-			{
-				DI=1;			 //发送“1”码
-				_nop_();		 //不可省略的nop(),延时指定时间作用，晶振频率33MHz
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-
-				DI=0;
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-			}
-			else				//发送“0”码
-			{
-				DI=1;
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-
-				DI=0;
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-				_nop_();
-			}
-			temp=(temp<<1);		 //左移位
-		}
-	}
-}
-//-------------------------------------------------------------------------------
-//子程序名称:SendOneFrame(unsigned char *ptr)
-//功能：发送一帧数据（即发送整个数组的数据）
-//参数：接收的参数是一个指针，此函数会将此指针指向的地址的整个数组的数据发送
-//-------------------------------------------------------------------------------
-void SendOneFrame(unsigned char *ptr)
-{
-	unsigned char k;
-
-	ResetDataFlow();				 //发送帧复位信号
-
-	for(k=0;k<SNUM;k++)				 //发送一帧数据，SNUM是板子LED的个数
-	{
-		SendOnePix(&ptr[(3*k)]);
-	}
-
-	ResetDataFlow();				 //发送帧复位信号
+  uint8_t ResCode[50]={0};
+  HAL_SPI_Transmit_DMA(&hspi1, ResCode, 50);
+  setAllPixelColor(0, 0, 0);
+  HAL_Delay (50);
+  setAllPixelColor(0, 0, 0);
+  HAL_Delay (50);
 }
 
-//-------------------------------------------------------------------------------
-//子程序名称:SendSameColor(unsigned char *ptr,unsigned char cnt)
-//功能：相同颜色的点发送cnt次
-//参数：接收的参数是一个指针，指向像素点颜色数组，cnt传递发送个数
-//-------------------------------------------------------------------------------
-void SendSameColor(unsigned char *ptr,unsigned char cnt)
-{
-	unsigned char k;
 
-	ResetDataFlow();				 //发送帧复位信号
+uint8_t rBuffer[PIXEL_MAX]={0};
+uint8_t gBuffer[PIXEL_MAX]={0};
+uint8_t bBuffer[PIXEL_MAX]={0};
+void setAllPixelColor(uint8_t r, uint8_t g, uint8_t b)
+{ 
+  uint8_t i=0;
+  for(i=0;i<PIXEL_MAX;i++)
+  {
+    rBuffer[i]=0;
+    gBuffer[i]=0;
+    bBuffer[i]=0;
+  }
+  for(i=0;i<PIXEL_MAX;i++)
+  {
+    rBuffer[i]=r;
+    gBuffer[i]=g;
+    bBuffer[i]=b;
+  }
 
-	for(k=0;k<cnt;k++)				 //发送一帧数据，SNUM是板子LED的个数
-	{
-		SendOnePix(&ptr[0]);
-	}
-
-	ResetDataFlow();				 //发送帧复位信号
+  for(i=0;i<PIXEL_MAX;i++)
+  {							  
+    Send_2811_24bits(rBuffer[i],gBuffer[i],bBuffer[i]);
+  }
+	PixelUpdate();
 }
-//-------------------------------------------------------------------------------
-//子程序名称:SendOneFrameFrom(unsigned char i,unsigned char *ptr)
-//功能：从指定的像素点开始发送一帧数据（即发送整个数组的数据）
-//参数：接收的参数是一个指针，此函数会将此指针指向的地址的整帧数据发送
-//		i:把数组的第0个像素数据发送到第i个像素点（第0个像素是板上标号为01的像素）
-//说明：即原本对应第一个像素的数据会发送到第i个像素点（LED）上
-//-------------------------------------------------------------------------------
-void SendOneFrameFrom(unsigned char i,unsigned char *ptr)
-{
-	unsigned char k;
+void setPixelColor(uint16_t n, uint8_t r, uint8_t g, uint8_t b)
+{	 
+  uint8_t i=0;
 
-	ResetDataFlow();				 //发送帧复位信号
+  for(i=0;i<PIXEL_MAX;i++)
+  {
+    rBuffer[i]=0;
+    gBuffer[i]=0;
+    bBuffer[i]=0;
+  }
+  rBuffer[n]=r;
+  gBuffer[n]=g;
+  bBuffer[n]=b;
+  for(i=0;i<PIXEL_MAX;i++)
+  {							  
+    Send_2811_24bits(rBuffer[i],gBuffer[i],bBuffer[i]);
+  }
+  PixelUpdate();
+}
+void SetPixelColor(uint16_t n, uint32_t c)
+{	 
+  uint8_t i=0;
+	  
+  rBuffer[n]=(uint8_t)(c>>16);
+  gBuffer[n]=(uint8_t)(c>>8);
+  bBuffer[n]=(uint8_t)c;
 
-   	for(k=(SNUM-i);k<SNUM;k++)		 //发送一帧数据
-	{
-		SendOnePix(&ptr[(3*k)]);
-	}
-	for(k=0;k<(SNUM-i);k++)
-	{
-		SendOnePix(&ptr[(3*k)]);
-	}
-
-	ResetDataFlow();				 //发送帧复位信号
+  for(i=0;i<PIXEL_MAX;i++)
+  {							  
+    Send_2811_24bits(rBuffer[i],gBuffer[i],bBuffer[i]);
+  }
+   PixelUpdate();
 }
 
-//-------------------------------------------------------------------------------
-//子程序名称:SendOneFrameSince(unsigned char i,unsigned char *ptr)
-//功能：从第i个像素点的数据开始发送一帧数据（即发送整个数组的数据）
-//参数：接收的参数是一个指针，此函数会将此指针指向的地址的整帧数据发送
-//		i:把数组的第i个像素数据发送到第1个像素点
-//说明：即原本对应第i像素的数据会发送到第1个像素点（LED）上，第i+1个像素点的数据
-//		发送到第2个像素上
-//-------------------------------------------------------------------------------
-void SendOneFrameSince(unsigned char i,unsigned char *ptr)
+uint32_t Color(uint8_t r, uint8_t g, uint8_t b)
 {
-	unsigned char k;
-
-	ResetDataFlow();				 //发送帧复位信号
-
-	for(k=i;k<SNUM;k++)				 //发送一帧数据
-	{
-		SendOnePix(&ptr[(3*k)]);
-	}
-	for(k=0;k<i;k++)
-	{
-		SendOnePix(&ptr[(3*k)]);
-	}
-	ResetDataFlow();				 //发送帧复位信号
+  return ((uint32_t)r << 16) | ((uint32_t)g <<  8) | b;
 }
-/**********************************THE END**********************************/ 
+uint32_t Wheel(uint8_t WheelPos)
+{
+  WheelPos = 255 - WheelPos;
+  if(WheelPos < 85) 
+  {
+    return Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  }
+  if(WheelPos < 170) {
+    WheelPos -= 85;
+    return Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  }
+  WheelPos -= 170;
+  return Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+}
+//2êo?
+void rainbow(uint8_t wait)
+{
+  uint16_t i, j;
+  
+  for(j=0; j<256; j++) 
+  {
+    for(i=0; i<PIXEL_MAX; i++)
+    {
+      SetPixelColor(i, Wheel((i+j) & 255));
+    }
+    PixelUpdate();
+    HAL_Delay (wait);
+  }
+}
+// Slightly different, this makes the rainbow equally distributed throughout
+void rainbowCycle(uint8_t wait) 
+{
+  uint16_t i, j;
+  
+  for(j=0; j<256*5; j++) 
+  { // 5 cycles of all colors on wheel
+    for(i=0; i< PIXEL_MAX; i++) 
+    {
+      SetPixelColor(i, Wheel(((i * 256 / PIXEL_MAX) + j) & 255));
+    }
+    PixelUpdate();
+    HAL_Delay (wait);
+  }
+}
+//Theatre-style crawling lights.o??üμ?
+void theaterChase(uint32_t c, uint8_t wait) 
+{
+  for (int j=0; j<10; j++) 
+  {  //do 10 cycles of chasing
+    for (int q=0; q < 3; q++) 
+    {
+      for (uint16_t i=0; i < PIXEL_MAX; i=i+1)//turn every one pixel on
+      {
+        SetPixelColor(i+q, c);    
+      }
+      PixelUpdate();
+      HAL_Delay(wait);
+      
+      for (uint16_t i=0; i < PIXEL_MAX; i=i+1) //turn every one pixel off
+      {
+        SetPixelColor(i+q, 0);        
+      }
+      PixelUpdate();
+    }
+  }
+}
 
- 
+//Theatre-style crawling lights with rainbow effect
+void theaterChaseRainbow(uint8_t wait) 
+{
+  for (int j=0; j < 256; j++) 
+  {     // cycle all 256 colors in the wheel
+    for (int q=0; q < 3; q++)
+    {
+      for (uint16_t i=0; i < PIXEL_MAX; i=i+1) //turn every one pixel on
+      {
+        SetPixelColor(i+q, Wheel( (i+j) % 255));    
+      }
+      PixelUpdate();
+      
+      HAL_Delay(wait);
+      
+      for (uint16_t i=0; i < PIXEL_MAX; i=i+1)//turn every one pixel off
+      {
+        SetPixelColor(i+q, 0);        
+      }
+      PixelUpdate();
+    }
+  }
+}
+// Fill the dots one after the other with a color
+void colorWipe(uint32_t c, uint8_t wait) 
+{
+  uint16_t i=0;
+  for( i=0; i<PIXEL_MAX; i++) 
+  {
+    SetPixelColor(i, c);
+    PixelUpdate();
+    HAL_Delay(wait);
+  }
+}
+
+
+
+void WS2812B_Test(void)
+{
+  setAllPixelColor(255, 0, 0);
+  HAL_Delay (500);
+  setAllPixelColor(0, 255, 0);
+  HAL_Delay (500);
+  setAllPixelColor(0, 0, 255);
+  HAL_Delay (500);
+  
+  setAllPixelColor(0, 0, 0);
+  HAL_Delay (500);
+  
+  setPixelColor(0, 0, 255, 0);
+  HAL_Delay (500);
+  setPixelColor(2, 0, 0, 255);
+  HAL_Delay (500); 
+  setPixelColor(4, 255, 0, 0);
+  HAL_Delay (500);
+  setPixelColor(6, 125, 125, 125);
+  HAL_Delay (500);    
+  setPixelColor(5, 0, 255, 0);
+  HAL_Delay (500);
+  setPixelColor(3, 0, 0, 255);
+  HAL_Delay (500); 
+  setPixelColor(1, 255, 0, 0);
+  HAL_Delay (500);
+  setAllPixelColor(0, 0, 0);
+  HAL_Delay (50);
+//  while(1)
+//  {
+//    // Some example procedures showing how to display to the pixels:
+//    colorWipe(Color(255, 0, 0), 500); // Red
+//    colorWipe(Color(0, 255, 0), 500); // Green
+//    colorWipe(Color(0, 0, 255), 500); // Blue
+//    // Send a theater pixel chase in...
+//    theaterChase(Color(127, 127, 127), 50); // White
+//    theaterChase(Color(127, 0, 0), 50); // Red
+//    theaterChase(Color(0, 127, 0), 50); // Green   
+//    theaterChase(Color(0, 0, 127), 50); // Blue   
+//    rainbow(20);//2êo?
+//    rainbowCycle(20);//?-?·
+//    theaterChaseRainbow(100);//o??üμ?
+//    //test code over
+//  }
+}
+
+
+
 

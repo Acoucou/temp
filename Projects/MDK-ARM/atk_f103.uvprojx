@@ -10,7 +10,7 @@
       <TargetName>LVGL</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060750::V5.06 update 6 (build 750)::ARMCC</pCCUsed>
+      <pCCUsed>5060528::V5.06 update 5 (build 528)::ARMCC</pCCUsed>
       <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -340,7 +340,7 @@
               <MiscControls>--diag_suppress=68 --diag_suppress=111 --diag_suppress=188 --diag_suppress=223 --diag_suppress=546  --diag_suppress=1295</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xE</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\Drivers\CMSIS\Device\ST\STM32F1xx\Include;..\..\Drivers\STM32F1xx_HAL_Driver\Inc;..\..\Drivers\CMSIS\Include;..\..\Drivers\;..\..\User;..\..\Middlewares;..\..\Middlewares\LVGL\GUI;..\..\Middlewares\LVGL\GUI\lvgl;..\..\Middlewares\LVGL\GUI\lvgl\src;..\..\Middlewares\LVGL\GUI\lvgl\examples\porting;..\..\Middlewares\LVGL\GUI_APP\demos;..\..\Middlewares\LVGL\GUI_APP\demos\stress;..\..\Middlewares\LVGL\GUI_APP\ui;..\..\Middlewares\LVGL\GUI_APP\ui\components;..\..\Middlewares\LVGL\GUI_APP\ui\fonts;..\..\Middlewares\LVGL\GUI_APP\ui\screens</IncludePath>
+              <IncludePath>..\..\Drivers\CMSIS\Device\ST\STM32F1xx\Include;..\..\Drivers\STM32F1xx_HAL_Driver\Inc;..\..\Drivers\CMSIS\Include;..\..\Drivers\;..\..\User;..\..\Middlewares;..\..\Middlewares\LVGL\GUI;..\..\Middlewares\LVGL\GUI\lvgl;..\..\Middlewares\LVGL\GUI\lvgl\src;..\..\Middlewares\LVGL\GUI\lvgl\examples\porting;..\..\Middlewares\LVGL\GUI_APP\demos;..\..\Middlewares\LVGL\GUI_APP\demos\stress;..\..\Middlewares\LVGL\GUI_APP\ui;..\..\Middlewares\LVGL\GUI_APP\ui\components;..\..\Middlewares\LVGL\GUI_APP\ui\fonts;..\..\Middlewares\LVGL\GUI_APP\ui\screens;..\..\Drivers\SYSTEM\sys;..\..\Drivers\BSP\DMA;..\..\Middlewares\LVGL\GUI_APP\myapp</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -504,6 +504,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_tim_ex.c</FilePath>
             </File>
+            <File>
+              <FileName>stm32f1xx_hal_spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_spi.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -563,6 +568,21 @@
               <FileName>btim.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Drivers\BSP\TIMER\btim.c</FilePath>
+            </File>
+            <File>
+              <FileName>spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Drivers\BSP\SPI\spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>ws2812.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Drivers\BSP\ws2812\ws2812.c</FilePath>
+            </File>
+            <File>
+              <FileName>dma.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Drivers\BSP\DMA\dma.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1458,6 +1478,16 @@
               <FileName>ui_comp_hook.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Middlewares\LVGL\GUI_APP\ui\components\ui_comp_hook.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Middlewares/LVGL/GUI_APP/myapp</GroupName>
+          <Files>
+            <File>
+              <FileName>ui_led.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Middlewares\LVGL\GUI_APP\myapp\ui_led.c</FilePath>
             </File>
           </Files>
         </Group>
