@@ -45,5 +45,6 @@ int main(void)
     while(1)
     {
         lv_task_handler();
+        WS2812B_Test();
     }
 }
