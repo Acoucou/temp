@@ -43,15 +43,15 @@ static void lv_timer_time_update(lv_timer_t *timer);
 // 入口函数
 void ui_led_start(void)
 {
-	lv_color_t c = lv_palette_main(LV_PALETTE_BLUE);
-	lv_theme_t * th = lv_theme_default_init(lv_disp_get_default(),  /*Use the DPI, size, etc from this display*/ 
-                                        c, lv_color_white(),   /*Primary and secondary palette*/
-                                        true,    /*Light or dark mode*/ 
-                                         LV_FONT_DEFAULT); /*Small, normal, large fonts*/
+	// lv_color_t c = lv_palette_main(LV_PALETTE_BLUE);
+	// lv_theme_t * th = lv_theme_default_init(lv_disp_get_default(),  /*Use the DPI, size, etc from this display*/ 
+    //                                     c, lv_color_white(),   /*Primary and secondary palette*/
+    //                                     true,    /*Light or dark mode*/ 
+    //                                      LV_FONT_DEFAULT); /*Small, normal, large fonts*/
 								
-	th = lv_theme_mono_init(lv_disp_get_default(), true, LV_FONT_DEFAULT);
+	// th = lv_theme_mono_init(lv_disp_get_default(), true, LV_FONT_DEFAULT);
                                        
-	lv_disp_set_theme(NULL, th); /*Assign the theme to the display*/
+	// lv_disp_set_theme(NULL, th); /*Assign the theme to the display*/
 	
 	
     tabview = lv_tabview_create(lv_scr_act(), LV_DIR_BOTTOM, 80);
@@ -64,10 +64,10 @@ void ui_led_start(void)
 	lv_ctr_led();	
 					
 	// tab2		
-	home_tab();
+	// home_tab();
 
     // tab3
-    sensor_tab();
+    // sensor_tab();
 }
 
 // 传感器界面

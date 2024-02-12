@@ -32,6 +32,7 @@ int main(void)
     tp_dev.init();                      /* 触摸屏初始化 */
     btim_timx_int_init(10-1,7200-1);    /* 初始化定时器 */
 	
+    MX_SPI2_Init();
 	WS2812B_Init();
 
     lv_init();                          /* lvgl系统初始化 */
@@ -40,11 +41,11 @@ int main(void)
     
     //lv_demo_stress();                   /* lvgl官方例程 */
 	//ui_init();
-	ui_led_start();
+	// ui_led_start();
 	
     while(1)
     {
-        lv_task_handler();
+        // lv_task_handler();
         WS2812B_Test();
     }
 }
