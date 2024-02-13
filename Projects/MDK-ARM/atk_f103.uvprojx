@@ -579,11 +579,6 @@
               <FileType>1</FileType>
               <FilePath>..\..\Drivers\BSP\ws2812\ws2812.c</FilePath>
             </File>
-            <File>
-              <FileName>dma.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\Drivers\BSP\DMA\dma.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>

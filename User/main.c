@@ -32,7 +32,6 @@ int main(void)
     tp_dev.init();                      /* 触摸屏初始化 */
     btim_timx_int_init(10-1,7200-1);    /* 初始化定时器 */
 	
-    MX_SPI2_Init();
 	WS2812B_Init();
 
     lv_init();                          /* lvgl系统初始化 */

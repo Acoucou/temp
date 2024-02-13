@@ -6,18 +6,18 @@
 void Send_8bits(uint8_t dat) 
 {
   uint8_t i=0;
-  static uint8_t CodeOne=0x7c;//7c£¬3e
-  static uint8_t CodeZero=0x70;//70,38
+  static uint8_t CodeOne=0xf0;
+  static uint8_t CodeZero=0xc0;
   
   for (i=0;i<8;i++)
   {
     if((dat & 0x80)==0x80)
     {
-      HAL_SPI_Transmit_DMA(&hspi2, &CodeOne, 1);
+      HAL_SPI_Transmit_DMA(&hspi1, &CodeOne, 1);
     }
     else
     {
-      HAL_SPI_Transmit_DMA(&hspi2, &CodeZero, 1); 
+      HAL_SPI_Transmit_DMA(&hspi1, &CodeZero, 1); 
     }
     dat=dat<<1;
   }
@@ -34,13 +34,14 @@ void Send_2811_24bits(uint8_t RData,uint8_t GData,uint8_t BData)
 void PixelUpdate(void)//should >24us
 {
   uint8_t rst[24]={0};
-  HAL_SPI_Transmit_DMA(&hspi2, rst, 24);
+  HAL_SPI_Transmit_DMA(&hspi1, rst, 24);
 }
 
 void WS2812B_Init(void)//should >50us
 {
   uint8_t ResCode[50]={0};
-  HAL_SPI_Transmit_DMA(&hspi2, ResCode, 50);
+  SPI_DMA_Init();
+  HAL_SPI_Transmit_DMA(&hspi1, ResCode, 50);
   setAllPixelColor(0, 0, 0);
   HAL_Delay (50);
   setAllPixelColor(0, 0, 0);
@@ -125,7 +126,7 @@ uint32_t Wheel(uint8_t WheelPos)
   WheelPos -= 170;
   return Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
-//2¨ºo?
+//2¨oo?
 void rainbow(uint8_t wait)
 {
   uint16_t i, j;
@@ -155,7 +156,7 @@ void rainbowCycle(uint8_t wait)
     HAL_Delay (wait);
   }
 }
-//Theatre-style crawling lights.o??¨¹¦Ì?
+//Theatre-style crawling lights.o??¨1|ì?
 void theaterChase(uint32_t c, uint8_t wait) 
 {
   for (int j=0; j<10; j++) 
@@ -254,9 +255,9 @@ void WS2812B_Test(void)
 //    theaterChase(Color(127, 0, 0), 50); // Red
 //    theaterChase(Color(0, 127, 0), 50); // Green   
 //    theaterChase(Color(0, 0, 127), 50); // Blue   
-//    rainbow(20);//2¨ºo?
-//    rainbowCycle(20);//?-?¡¤
-//    theaterChaseRainbow(100);//o??¨¹¦Ì?
+//    rainbow(20);//2¨oo?
+//    rainbowCycle(20);//?-??¤
+//    theaterChaseRainbow(100);//o??¨1|ì?
 //    //test code over
 //  }
 }
