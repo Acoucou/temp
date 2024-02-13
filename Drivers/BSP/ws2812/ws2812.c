@@ -13,11 +13,11 @@ void Send_8bits(uint8_t dat)
   {
     if((dat & 0x80)==0x80)
     {
-      HAL_SPI_Transmit_DMA(&hspi1, &CodeOne, 1);
+      HAL_SPI_Transmit_DMA(&hspi2, &CodeOne, 1);
     }
     else
     {
-      HAL_SPI_Transmit_DMA(&hspi1, &CodeZero, 1); 
+      HAL_SPI_Transmit_DMA(&hspi2, &CodeZero, 1); 
     }
     dat=dat<<1;
   }
@@ -34,14 +34,14 @@ void Send_2811_24bits(uint8_t RData,uint8_t GData,uint8_t BData)
 void PixelUpdate(void)//should >24us
 {
   uint8_t rst[24]={0};
-  HAL_SPI_Transmit_DMA(&hspi1, rst, 24);
+  HAL_SPI_Transmit_DMA(&hspi2, rst, 24);
 }
 
 void WS2812B_Init(void)//should >50us
 {
   uint8_t ResCode[50]={0};
   SPI_DMA_Init();
-  HAL_SPI_Transmit_DMA(&hspi1, ResCode, 50);
+  HAL_SPI_Transmit_DMA(&hspi2, ResCode, 50);
   setAllPixelColor(0, 0, 0);
   HAL_Delay (50);
   setAllPixelColor(0, 0, 0);

@@ -1,24 +1,24 @@
 #include "spi.h"
  
  
-SPI_HandleTypeDef hspi1;  // SPI 1
+SPI_HandleTypeDef hspi2;  // SPI 2
 DMA_HandleTypeDef hdma1;
 // SPI ? DMA???
 void SPI_DMA_Init(void)
 {
-  hspi1.Instance               =  SPI1 ; // SPI1 ???
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16 ; //?????
-  hspi1.Init.CLKPhase          = SPI_PHASE_2EDGE;           //????
-  hspi1.Init.CLKPolarity       = SPI_POLARITY_HIGH;         //?????
-  hspi1.Init.CRCCalculation    = SPI_CRCCALCULATION_DISABLE;//??CEC??
-  hspi1.Init.CRCPolynomial     = 10;                        //?????
-  hspi1.Init.DataSize          = SPI_DATASIZE_8BIT;         //???(8bit)
-  hspi1.Init.Direction         = SPI_DIRECTION_2LINES;      //???
-  hspi1.Init.FirstBit          = SPI_FIRSTBIT_MSB;          //??????
-  hspi1.Init.Mode              = SPI_MODE_MASTER ;          //SPI??
-  hspi1.Init.NSS               = SPI_NSS_SOFT;              // ????SS
-  hspi1.Init.TIMode            = SPI_TIMODE_DISABLE;        // ????Motorola?
-  HAL_SPI_Init(&hspi1); //SPI1 ???
+  hspi2.Instance               =  SPI2 ; // SPI2 ???
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16 ; //?????
+  hspi2.Init.CLKPhase          = SPI_PHASE_2EDGE;           //????
+  hspi2.Init.CLKPolarity       = SPI_POLARITY_HIGH;         //?????
+  hspi2.Init.CRCCalculation    = SPI_CRCCALCULATION_DISABLE;//??CEC??
+  hspi2.Init.CRCPolynomial     = 10;                        //?????
+  hspi2.Init.DataSize          = SPI_DATASIZE_8BIT;         //???(8bit)
+  hspi2.Init.Direction         = SPI_DIRECTION_2LINES;      //???
+  hspi2.Init.FirstBit          = SPI_FIRSTBIT_MSB;          //??????
+  hspi2.Init.Mode              = SPI_MODE_MASTER ;          //SPI??
+  hspi2.Init.NSS               = SPI_NSS_SOFT;              // ????SS
+  hspi2.Init.TIMode            = SPI_TIMODE_DISABLE;        // ????Motorola?
+  HAL_SPI_Init(&hspi2); //SPI2 ???
   
   HAL_NVIC_SetPriority(DMA1_Channel3_IRQn,0,0); //??????
   HAL_NVIC_EnableIRQ(DMA1_Channel3_IRQn);// ????
@@ -29,17 +29,21 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi)
 {
   GPIO_InitTypeDef GPIO_InitTypeSture ={0};
   
-  __HAL_RCC_SPI1_CLK_ENABLE(); // ??SPI1??
-  __HAL_RCC_GPIOA_CLK_ENABLE();// ??GPIOA??
+  __HAL_RCC_SPI2_CLK_ENABLE(); // ??SPI2??
+  __HAL_RCC_GPIOB_CLK_ENABLE();// ??GPIOB??
   __DMA1_CLK_ENABLE();         // ??DMA1??
-  
-  if(hspi ->Instance ==SPI1) //????????SPI1
+
+  /**SPI2 GPIO Configuration    
+    PB13     ------> SPI2_SCK
+    PB15     ------> SPI2_MOSI 
+    */
+  if(hspi ->Instance ==SPI2) //????????SPI2
   {
     GPIO_InitTypeSture.Mode = GPIO_MODE_AF_PP;     //?????????
-    GPIO_InitTypeSture.Pin  = GPIO_PIN_5 | GPIO_PIN_7;
+    GPIO_InitTypeSture.Pin  = GPIO_PIN_13|GPIO_PIN_15;
     GPIO_InitTypeSture.Pull = GPIO_PULLUP;
     GPIO_InitTypeSture.Speed = GPIO_SPEED_FREQ_HIGH; 
-    HAL_GPIO_Init(GPIOA,&GPIO_InitTypeSture); //GPIO ???
+    HAL_GPIO_Init(GPIOB,&GPIO_InitTypeSture); //GPIO ???
     
     hdma1.Instance                 = DMA1_Channel3;         //????DMA1??3
     hdma1.Init.Direction           = DMA_MEMORY_TO_PERIPH;  // ?????
