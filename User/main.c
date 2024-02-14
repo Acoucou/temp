@@ -40,11 +40,10 @@ int main(void)
     
     //lv_demo_stress();                   /* lvgl¹Ù·½Àý³Ì */
 	//ui_init();
-	//ui_led_start();
+	ui_led_start();
 	
     while(1)
     {
-        // lv_task_handler();
-        WS2812B_Test();
+        lv_task_handler();
     }
 }

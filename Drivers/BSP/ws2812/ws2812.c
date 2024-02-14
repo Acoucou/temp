@@ -1,267 +1,547 @@
-
 #include "ws2812.h"
+#include "math.h"
+#include "./BSP/spi/spi.h"
+#include "lvgl.h"
 
-#define PIXEL_MAX 7
+// Some Static Colors
+const RGBColor_TypeDef RED      = {255,0,0};
+const RGBColor_TypeDef GREEN    = {0,255,0};
+const RGBColor_TypeDef BLUE     = {0,0,255};
+const RGBColor_TypeDef SKY      = {0,255,255};
+const RGBColor_TypeDef MAGENTA  = {255,0,255};
+const RGBColor_TypeDef YELLOW   = {255,255,0};
+const RGBColor_TypeDef ORANGE   = {127,106,0};
+const RGBColor_TypeDef BLACK    = {0,0,0};
+const RGBColor_TypeDef WHITE    = {255,255,255};
+const RGBColor_TypeDef PURPLE   = {65,105,225};
 
-void Send_8bits(uint8_t dat) 
-{
-  uint8_t i=0;
-  static uint8_t CodeOne=0xf0;
-  static uint8_t CodeZero=0xc0;
+static u8 pixelBuffer[Pixel_S1_NUM][24];                     //??
+RGB_Color  rgb_color;
+HSV_Color  hsv_color;
+
+/***********************************************************************************************
+**     name: WS2812b_Configuration
+** function:  WS2812B SPI DMA?????
+**parameter: void
+************************************************************************************************/
+/*****************************************
+ ???
+ SPI2?
+ ???????PB15????TFTLCD??LCD BL
+ ?????????SPI2?APB1(42MHz)????
+ ****************************************/
+void WS2812B_Init(void){
+	SPI_DMA_Init();
+}
+
+/***********************************************************************************************
+**     name: rgb_SetColor
+** function: ????RGB LED???
+**parameter: void
+**   return: void
+************************************************************************************************/
+void rgb_SetColor(u16 LedId, RGBColor_TypeDef Color){
+	
+ 	u16 i;
   
-  for (i=0;i<8;i++)
-  {
-    if((dat & 0x80)==0x80)
-    {
-      HAL_SPI_Transmit_DMA(&hspi1, &CodeOne, 1);
-    }
-    else
-    {
-      HAL_SPI_Transmit_DMA(&hspi1, &CodeZero, 1); 
-    }
-    dat=dat<<1;
-  }
-}
-//G--R--B
-//MSB first	
-void Send_2811_24bits(uint8_t RData,uint8_t GData,uint8_t BData)
-{   
-  Send_8bits(GData);  
-  Send_8bits(RData); 
-  Send_8bits(BData);
-} 
-
-void PixelUpdate(void)//should >24us
-{
-  uint8_t rst[24]={0};
-  HAL_SPI_Transmit_DMA(&hspi1, rst, 24);
+  for(i=0;i<=7;i++){
+		pixelBuffer[LedId][i]= ( (Color.G & (1 << (7 -i)) )? (CODE1):CODE0 );
+	}
+  for(i=8;i<=15;i++){
+		pixelBuffer[LedId][i]= ( (Color.R & (1 << (15-i)) )? (CODE1):CODE0 );
+	}
+  for(i=16;i<=23;i++){
+		pixelBuffer[LedId][i]= ( (Color.B & (1 << (23-i)) )? (CODE1):CODE0 );
+	}
 }
 
-void WS2812B_Init(void)//should >50us
-{
-  uint8_t ResCode[50]={0};
-  SPI_DMA_Init();
-  HAL_SPI_Transmit_DMA(&hspi1, ResCode, 50);
-  setAllPixelColor(0, 0, 0);
-  HAL_Delay (50);
-  setAllPixelColor(0, 0, 0);
-  HAL_Delay (50);
+/***********************************************************************************************
+**     name: rgb_SendArray
+** function: Configure colors to RGB pixel series.
+             RGBColor_TypeDef: pointer to a RGBColor_TypeDef structure that contains the color configuration information for the RGB pixel.
+**parameter: void
+**   return: void
+************************************************************************************************/
+void rgb_SendArray(void){
+	HAL_SPI_Transmit_DMA(&hspi1, (u8 *)pixelBuffer, Pixel_S1_NUM * 24);
 }
 
 
-uint8_t rBuffer[PIXEL_MAX]={0};
-uint8_t gBuffer[PIXEL_MAX]={0};
-uint8_t bBuffer[PIXEL_MAX]={0};
-void setAllPixelColor(uint8_t r, uint8_t g, uint8_t b)
-{ 
-  uint8_t i=0;
-  for(i=0;i<PIXEL_MAX;i++)
-  {
-    rBuffer[i]=0;
-    gBuffer[i]=0;
-    bBuffer[i]=0;
-  }
-  for(i=0;i<PIXEL_MAX;i++)
-  {
-    rBuffer[i]=r;
-    gBuffer[i]=g;
-    bBuffer[i]=b;
-  }
 
-  for(i=0;i<PIXEL_MAX;i++)
-  {							  
-    Send_2811_24bits(rBuffer[i],gBuffer[i],bBuffer[i]);
-  }
-	PixelUpdate();
-}
-void setPixelColor(uint16_t n, uint8_t r, uint8_t g, uint8_t b)
-{	 
-  uint8_t i=0;
-
-  for(i=0;i<PIXEL_MAX;i++)
-  {
-    rBuffer[i]=0;
-    gBuffer[i]=0;
-    bBuffer[i]=0;
-  }
-  rBuffer[n]=r;
-  gBuffer[n]=g;
-  bBuffer[n]=b;
-  for(i=0;i<PIXEL_MAX;i++)
-  {							  
-    Send_2811_24bits(rBuffer[i],gBuffer[i],bBuffer[i]);
-  }
-  PixelUpdate();
-}
-void SetPixelColor(uint16_t n, uint32_t c)
-{	 
-  uint8_t i=0;
-	  
-  rBuffer[n]=(uint8_t)(c>>16);
-  gBuffer[n]=(uint8_t)(c>>8);
-  bBuffer[n]=(uint8_t)c;
-
-  for(i=0;i<PIXEL_MAX;i++)
-  {							  
-    Send_2811_24bits(rBuffer[i],gBuffer[i],bBuffer[i]);
-  }
-   PixelUpdate();
+/***********************************************************************************************
+**     name: RGB_RED
+** function: ?????RED
+**parameter: Pixel_LEN ???
+**   return: void
+************************************************************************************************/
+void RGB_RED(u16 Pixel_LEN){
+	
+  u16 i;
+	
+  for(i = 0; i < Pixel_LEN; i++){  
+    rgb_SetColor(i,RED);
+	}
+  
+  rgb_SendArray();
 }
 
-uint32_t Color(uint8_t r, uint8_t g, uint8_t b)
-{
-  return ((uint32_t)r << 16) | ((uint32_t)g <<  8) | b;
-}
-uint32_t Wheel(uint8_t WheelPos)
-{
+/***********************************************************************************************
+**     name: Colourful_Wheel
+** function: ??????GRB
+**parameter: WheelPos ????
+**   return: RGBColor_TypeDef ??GRB
+************************************************************************************************/
+RGBColor_TypeDef Colourful_Wheel(u8 WheelPos){
+	
+	RGBColor_TypeDef color;
   WheelPos = 255 - WheelPos;
-  if(WheelPos < 85) 
-  {
-    return Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  
+  if(WheelPos < 85){
+    color.R = 255 - WheelPos * 3;
+    color.G = 0;
+    color.B = WheelPos * 3;
+		return color;
   }
-  if(WheelPos < 170) {
+  if(WheelPos < 170){
     WheelPos -= 85;
-    return Color(0, WheelPos * 3, 255 - WheelPos * 3);
+    color.R = 0;
+    color.G = WheelPos * 3;
+    color.B = 255 - WheelPos * 3;
+		return color;
   }
+  
   WheelPos -= 170;
-  return Color(WheelPos * 3, 255 - WheelPos * 3, 0);
-}
-//2¨oo?
-void rainbow(uint8_t wait)
-{
-  uint16_t i, j;
+  color.R = WheelPos * 3; 
+  color.G = 255 - WheelPos * 3;
+  color.B = 0;
   
-  for(j=0; j<256; j++) 
+  return color;  
+}
+
+void rainbowCycle(u16 Pixel_LEN){
+	
+  u16 i, j = 0;
+
+  for(j = 0; j < 1023; j++){                                                   // 1 cycles of all colors on wheel
+    for(i = 0; i < Pixel_LEN; i++){  
+      rgb_SetColor(i,Colourful_Wheel(((i * 256 / Pixel_LEN) + j)&255));
+	} 
+    rgb_SendArray();
+    
+    /* ???????????????? */
+    // HAL_Delay(20);
+    for(i=0; i <20; i++){
+      HAL_Delay(1);
+      lv_task_handler();
+    }
+  }
+}
+
+/**
+ * @Description  	?????
+* @Param     	 NONE
+ * @Return    	NONE  
+*/
+void ws2812_AllOpen(uint8_t red ,uint8_t green ,uint8_t blue)
+{
+	u16 i, j;
+  for(j = 0; j < 14; j++){
+	  for(i=0;i<=7;i++){
+			pixelBuffer[j][i]= ( (red & (1 << (7 -i)) )? (CODE1):CODE0 );
+		}
+	  for(i=8;i<=15;i++){
+			pixelBuffer[j][i]= ( (green & (1 << (15-i)) )? (CODE1):CODE0 );
+		}
+	  for(i=16;i<=23;i++){
+			pixelBuffer[j][i]= ( (blue & (1 << (23-i)) )? (CODE1):CODE0 );
+		}
+	}
+   rgb_SendArray();
+}
+/**
+ * @Description  	WS2812 ???n??????
+* @Param     n:?????   red:0-255   green:0-255    blue:0-255 	   eg:yellow:255 255 0
+ * @Return    	  
+*/
+
+//???????????24???
+uint32_t ws281x_color(uint8_t red, uint8_t green, uint8_t blue)
+{
+  return green << 16 | red << 8 | blue;
+}
+void ws281x_setPixelRGB2(uint16_t n ,uint8_t red, uint8_t green, uint8_t blue){
+	 u16 i;
+
+	if(n < Pixel_S1_NUM)
+	  {
+		for(i = 0; i < 24; ++i)
+		{
+		  pixelBuffer[n][i] = (((ws281x_color(red,green,blue) << i) & 0X800000) ? CODE1 : CODE0);
+		}
+	  }
+	rgb_SendArray();
+}
+//???n??????
+void ws281x_setPixelRGB(uint16_t n ,uint8_t red, uint8_t green, uint8_t blue)
+{
+  u16 i;
+
+	  for(i=0;i<=7;i++){
+			pixelBuffer[n][i]= ( (red & (1 << (7 -i)) )? (CODE1):CODE0 );
+		}
+	  for(i=8;i<=15;i++){
+			pixelBuffer[n][i]= ( (green & (1 << (15-i)) )? (CODE1):CODE0 );
+		}
+	  for(i=16;i<=23;i++){
+			pixelBuffer[n][i]= ( (blue & (1 << (23-i)) )? (CODE1):CODE0 );
+	  }
+
+   rgb_SendArray();
+}
+/**
+ * @Description  	WS2812??????		1. ??WS2812_LED_NUM * 24?? 0 ?
+																
+ * @Param     	  {void}
+ * @Return    	  {void}
+*/
+void ws2812_AllShutOff(void){
+	uint16_t i;
+  uint8_t j;
+  
+  for(i = 0; i < Pixel_S1_NUM; i++)
   {
-    for(i=0; i<PIXEL_MAX; i++)
+    for(j = 0; j < 24; j++)
     {
-      SetPixelColor(i, Wheel((i+j) & 255));
+      pixelBuffer[i][j] = CODE0;
     }
-    PixelUpdate();
-    HAL_Delay (wait);
   }
-}
-// Slightly different, this makes the rainbow equally distributed throughout
-void rainbowCycle(uint8_t wait) 
-{
-  uint16_t i, j;
   
-  for(j=0; j<256*5; j++) 
-  { // 5 cycles of all colors on wheel
-    for(i=0; i< PIXEL_MAX; i++) 
-    {
-      SetPixelColor(i, Wheel(((i * 256 / PIXEL_MAX) + j) & 255));
-    }
-    PixelUpdate();
-    HAL_Delay (wait);
-  }
+  rgb_SendArray();
 }
-//Theatre-style crawling lights.o??¨1|ì?
-void theaterChase(uint32_t c, uint8_t wait) 
+void set_pixel_rgb(uint16_t n,u8 color)
 {
-  for (int j=0; j<10; j++) 
-  {  //do 10 cycles of chasing
-    for (int q=0; q < 3; q++) 
-    {
-      for (uint16_t i=0; i < PIXEL_MAX; i=i+1)//turn every one pixel on
-      {
-        SetPixelColor(i+q, c);    
-      }
-      PixelUpdate();
-      HAL_Delay(wait);
-      
-      for (uint16_t i=0; i < PIXEL_MAX; i=i+1) //turn every one pixel off
-      {
-        SetPixelColor(i+q, 0);        
-      }
-      PixelUpdate();
-    }
-  }
-}
+	switch(color)
+	{
+		case Red: 
+			ws281x_setPixelRGB(n,255,0,0);
+			break;
+		case Green: 
+			ws281x_setPixelRGB(n,0,255,0);
+			break;
+		case Blue: 
+			ws281x_setPixelRGB(n,0,0,255);
+			break;
+		case Yellow: 
+			ws281x_setPixelRGB(n,255,255,0);
+			break;
+		case Purple: 
+			ws281x_setPixelRGB(n,255,0,255);
+			break;
+		case Orange: 
+			ws281x_setPixelRGB(n,255,125,0);
+			break;
+		case Indigo: 
+			ws281x_setPixelRGB(n,0,255,255);
+			break;
+		case White:
+			ws281x_setPixelRGB(n,255,255,255);
+			break;
+	
+	}
 
-//Theatre-style crawling lights with rainbow effect
-void theaterChaseRainbow(uint8_t wait) 
-{
-  for (int j=0; j < 256; j++) 
-  {     // cycle all 256 colors in the wheel
-    for (int q=0; q < 3; q++)
-    {
-      for (uint16_t i=0; i < PIXEL_MAX; i=i+1) //turn every one pixel on
-      {
-        SetPixelColor(i+q, Wheel( (i+j) % 255));    
-      }
-      PixelUpdate();
-      
-      HAL_Delay(wait);
-      
-      for (uint16_t i=0; i < PIXEL_MAX; i=i+1)//turn every one pixel off
-      {
-        SetPixelColor(i+q, 0);        
-      }
-      PixelUpdate();
-    }
-  }
 }
-// Fill the dots one after the other with a color
-void colorWipe(uint32_t c, uint8_t wait) 
+/**
+ * @Description  	?????
+* @Param     interval_time:????  red:0-255 green:0-255 blue:0-255
+ * @Return    	NONE  
+*/
+void Running_water_lamp( uint8_t red ,uint8_t green ,uint8_t blue, uint16_t interval_time )
 {
-  uint16_t i=0;
-  for( i=0; i<PIXEL_MAX; i++) 
+	uint16_t i, j;
+  
+  for(i = 0; i < Pixel_S1_NUM; i++)
   {
-    SetPixelColor(i, c);
-    PixelUpdate();
-    HAL_Delay(wait);
+		ws281x_setPixelRGB(i,red,green,blue);
+
+    /* ???????????????? */
+    // HAL_Delay(interval_time);
+    for(j=0; j <interval_time; j++){
+      HAL_Delay(1);
+      lv_task_handler();
+    }
+  }
+	ws2812_AllShutOff();
+	/* ???????????????? */
+    // HAL_Delay(interval_time);
+    for(j=0; j <interval_time; j++){
+      HAL_Delay(1);
+      lv_task_handler();
+    }
+}
+//?????n???
+void ws281x_ShutoffPixel(uint16_t n)
+{
+  uint8_t i;
+  
+  if(n < Pixel_S1_NUM)
+  {
+    for(i = 0; i < 24; ++i)
+    {
+      pixelBuffer[n][i] = CODE0;
+    }
+  }
+	rgb_SendArray();
+	/* ???????????????? */
+    // HAL_Delay(10);
+    for(i=0; i <10; i++){
+      HAL_Delay(1);
+      lv_task_handler();
+    }
+}
+/**
+ * @Description  	?????
+* @Param     interval_time:????
+ * @Return    	NONE  
+*/
+void horse_race_lamp(uint16_t interval_time)
+{
+	u8 i,j,color;
+
+  for(i = 0; i < Pixel_S1_NUM; i++)
+  {
+//		ws281x_setPixelRGB(i,255,255,0);
+		color = rand()%7;
+		set_pixel_rgb(i,color);//????
+		ws281x_ShutoffPixel(i-1);
+		/* ???????????????? */
+    // HAL_Delay(interval_time);
+    for(j=0; j <interval_time; j++){
+      HAL_Delay(1);
+      lv_task_handler();
+    }
+  }
+	ws281x_ShutoffPixel(Pixel_S1_NUM-1);
+	/* ???????????????? */
+    // HAL_Delay(interval_time);
+    for(j=0; j <interval_time; j++){
+      HAL_Delay(1);
+      lv_task_handler();
+    }
+}
+
+/**
+ * @Description  	WS2812??????LED??? ????
+ * @Param     	  {uint16_t LED_index ,uint32_t GRB_color}
+ * @Return    	  {void}
+*/
+void ws2812_Set_one_LED_Color(uint16_t LED_index ,uint32_t GRB_color){
+  uint8_t i = 0;
+	uint32_t cnt = 0x800000;
+  if(LED_index < Pixel_S1_NUM){
+    for(i = 0; i < 24; ++i){
+			if(GRB_color & cnt){
+				pixelBuffer[LED_index][i] = CODE1;
+			}
+			else{
+				pixelBuffer[LED_index][i] = CODE0;
+			}
+			cnt >>= 1;
+    }
+  }
+}
+/**
+ * @Description  	WS2812 ????? ?->?->?
+ * @Param     	  {uint16_t interval_time, uint32_t GRB_color} ??????
+ * @Return    	  {void}
+*/
+void ws2812_All_LED_one_Color_breath(uint16_t interval_time, uint32_t GRB_color){
+	uint8_t i = 0, k;
+	uint16_t j = 0;
+	rgb_color.G = GRB_color>>16;
+	rgb_color.R = GRB_color>>8;
+	rgb_color.B = GRB_color;
+	for(i=1;i<=100;i++){
+		__brightnessAdjust(i/100.0f, rgb_color);
+		for(j=0;j<Pixel_S1_NUM;j++){
+			ws2812_Set_one_LED_Color(j, ((rgb_color.G<<16) | (rgb_color.R<<8) | (rgb_color.B)));
+		}
+		rgb_SendArray();
+		/* ???????????????? */
+    // HAL_Delay(interval_time);
+    for(k=0; k <interval_time; k++){
+      HAL_Delay(1);
+      lv_task_handler();
+    }
+	}
+	for(i=100;i>=1;i--){
+		__brightnessAdjust(i/100.0f, rgb_color);
+		for(j=0;j<Pixel_S1_NUM;j++){
+			ws2812_Set_one_LED_Color(j, ((rgb_color.G<<16) | (rgb_color.R<<8) | (rgb_color.B)));
+		}
+		rgb_SendArray();
+		/* ???????????????? */
+    // HAL_Delay(interval_time);
+    for(k=0; k <interval_time; k++){
+      HAL_Delay(1);
+      lv_task_handler();
+    }
+	}
+}
+void light_ctr(u8 light, uint32_t GRB_color){
+	uint16_t j = 0;
+	rgb_color.G = GRB_color>>16;
+	rgb_color.R = GRB_color>>8;
+	rgb_color.B = GRB_color;
+	
+	__brightnessAdjust(light/100.0f, rgb_color);
+	for(j=0;j<Pixel_S1_NUM;j++){
+		ws2812_Set_one_LED_Color(j, ((rgb_color.G<<16) | (rgb_color.R<<8) | (rgb_color.B)));
+	}
+	rgb_SendArray();
+
+}
+/***********************************************************
+										Private Function
+************************************************************/
+/**
+ * @Description  	???????
+ * @Param     	  {float a,float b}
+ * @Return    	  {float}
+*/
+float __getMaxValue(float a, float b){
+	return a>=b?a:b;
+}
+
+/**
+ * @Description  	???????
+ * @Param     	  {void}
+ * @Return    	  {void}
+*/
+float __getMinValue(float a, float b){
+	return a<=b?a:b;
+}
+
+
+/**
+ * @Description  	RGB ?? HSV
+ * @Param     	  {RGB_Color RGB, HSV_Color *HSV}
+ * @Return    	  {void}
+*/
+void __RGB_2_HSV(RGB_Color RGB, HSV_Color *HSV){
+	float r,g,b,minRGB,maxRGB,deltaRGB;
+	
+	r = RGB.R/255.0f;
+	g = RGB.G/255.0f;
+	b = RGB.B/255.0f;
+	maxRGB = __getMaxValue(r, __getMaxValue(g,b));
+	minRGB = __getMinValue(r, __getMinValue(g,b));
+	deltaRGB = maxRGB - minRGB;
+	
+	HSV->V = deltaRGB;
+	if(maxRGB != 0.0f){
+		HSV->S = deltaRGB / maxRGB;
+	}
+	else{
+		HSV->S = 0.0f;
+	}
+	if(HSV->S <= 0.0f){
+		HSV->H = 0.0f;
+	}
+	else{
+		if(r == maxRGB){
+			HSV->H = (g-b)/deltaRGB;
+    }
+    else{
+			if(g == maxRGB){
+        HSV->H = 2.0f + (b-r)/deltaRGB;
+      }
+      else{
+				if (b == maxRGB){
+					HSV->H = 4.0f + (r-g)/deltaRGB;
+        }
+      }
+    }
+    HSV->H = HSV->H * 60.0f;
+    if (HSV->H < 0.0f){
+			HSV->H += 360;
+    }
+    HSV->H /= 360;
   }
 }
 
 
-
-void WS2812B_Test(void)
-{
-  setAllPixelColor(255, 0, 0);
-  HAL_Delay (500);
-  setAllPixelColor(0, 255, 0);
-  HAL_Delay (500);
-  setAllPixelColor(0, 0, 255);
-  HAL_Delay (500);
-  
-  setAllPixelColor(0, 0, 0);
-  HAL_Delay (500);
-  
-  setPixelColor(0, 0, 255, 0);
-  HAL_Delay (500);
-  setPixelColor(2, 0, 0, 255);
-  HAL_Delay (500); 
-  setPixelColor(4, 255, 0, 0);
-  HAL_Delay (500);
-  setPixelColor(6, 125, 125, 125);
-  HAL_Delay (500);    
-  setPixelColor(5, 0, 255, 0);
-  HAL_Delay (500);
-  setPixelColor(3, 0, 0, 255);
-  HAL_Delay (500); 
-  setPixelColor(1, 255, 0, 0);
-  HAL_Delay (500);
-  setAllPixelColor(0, 0, 0);
-  HAL_Delay (50);
-//  while(1)
-//  {
-//    // Some example procedures showing how to display to the pixels:
-//    colorWipe(Color(255, 0, 0), 500); // Red
-//    colorWipe(Color(0, 255, 0), 500); // Green
-//    colorWipe(Color(0, 0, 255), 500); // Blue
-//    // Send a theater pixel chase in...
-//    theaterChase(Color(127, 127, 127), 50); // White
-//    theaterChase(Color(127, 0, 0), 50); // Red
-//    theaterChase(Color(0, 127, 0), 50); // Green   
-//    theaterChase(Color(0, 0, 127), 50); // Blue   
-//    rainbow(20);//2¨oo?
-//    rainbowCycle(20);//?-??¤
-//    theaterChaseRainbow(100);//o??¨1|ì?
-//    //test code over
-//  }
+/**
+ * @Description  	HSV ?? RGB
+ * @Param     	  {void}
+ * @Return    	  {void}
+*/
+void __HSV_2_RGB(HSV_Color HSV, RGB_Color *RGB){
+	float R,G,B,aa,bb,cc,f;
+  int k;
+  if (HSV.S <= 0.0f)
+		R = G = B = HSV.V;
+  else{
+		if (HSV.H == 1.0f){
+			HSV.H = 0.0f;
+		}
+    HSV.H *= 6.0f;
+    k = (int)floor(HSV.H);
+    f = HSV.H - k;
+    aa = HSV.V * (1.0f - HSV.S);
+    bb = HSV.V * (1.0f - HSV.S * f);
+    cc = HSV.V * (1.0f -(HSV.S * (1.0f - f)));
+    switch(k){
+      case 0:
+       R = HSV.V; 
+       G = cc; 
+       B =aa;
+       break;
+      case 1:
+       R = bb; 
+       G = HSV.V;
+       B = aa;
+       break;
+      case 2:
+       R =aa;
+       G = HSV.V;
+       B = cc;
+       break;
+      case 3:
+       R = aa;
+       G = bb;
+       B = HSV.V;
+       break;
+      case 4:
+       R = cc;
+       G = aa;
+       B = HSV.V;
+       break;
+      case 5:
+       R = HSV.V;
+       G = aa;
+       B = bb;
+       break;
+    }
+  }
+  RGB->R = (unsigned char)(R * 255);
+  RGB->G = (unsigned char)(G * 255);
+  RGB->B = (unsigned char)(B * 255);
 }
 
 
-
-
+/**
+ * @Description  	????
+ * @Param     	  {void}
+ * @Return    	  {void}
+*/
+void __brightnessAdjust(float percent, RGB_Color RGB){
+	if(percent < 0.01f){
+		percent = 0.01f;
+	}
+	if(percent > 1.0f){
+		percent = 1.0f;
+	}
+	__RGB_2_HSV(RGB, &hsv_color);
+	hsv_color.V = percent;
+	__HSV_2_RGB(hsv_color, &rgb_color);
+}

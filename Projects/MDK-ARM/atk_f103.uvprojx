@@ -1484,6 +1484,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\Middlewares\LVGL\GUI_APP\myapp\ui_led.c</FilePath>
             </File>
+            <File>
+              <FileName>led_img.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Middlewares\LVGL\GUI_APP\myapp\led_img.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
