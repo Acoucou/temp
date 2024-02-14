@@ -40,7 +40,7 @@ int main(void)
     
     //lv_demo_stress();                   /* lvgl¹Ù·½Àý³Ì */
 	//ui_init();
-	// ui_led_start();
+	//ui_led_start();
 	
     while(1)
     {
