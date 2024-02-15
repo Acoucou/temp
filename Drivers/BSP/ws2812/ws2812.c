@@ -3,6 +3,8 @@
 #include "./BSP/spi/spi.h"
 #include "lvgl.h"
 
+#define  OPT
+
 #define para 10    // ??lv_task_handler()??????100us?
 
 // Some Static Colors
@@ -129,13 +131,19 @@ void rainbowCycle(u16 Pixel_LEN){
       rgb_SetColor(i,Colourful_Wheel(((i * 256 / Pixel_LEN) + j)&255));
 	} 
     rgb_SendArray();
-    
+	
+	#ifdef OPT
+		HAL_Delay(20);
+		lv_task_handler();
+    #else
     /* ???????????????? */
     // HAL_Delay(20);
     for(i=0; i <20*para; i++){
       lv_task_handler();  // if 100us? i=200
     }
+    #endif
   }
+	
 }
 
 /**
@@ -263,21 +271,21 @@ void Running_water_lamp( uint8_t red ,uint8_t green ,uint8_t blue, uint16_t inte
   for(i = 0; i < Pixel_S1_NUM; i++)
   {
 		ws281x_setPixelRGB(i,red,green,blue);
-
+	#ifdef OPT
+		HAL_Delay(interval_time);
+		lv_task_handler();
+    #else
     /* ???????????????? */
     // HAL_Delay(interval_time);
     for(j=0; j <interval_time*para; j++){
       // HAL_Delay(1);
       lv_task_handler();
     }
+	#endif
   }
 	ws2812_AllShutOff();
 	/* ???????????????? */
-    // HAL_Delay(interval_time);
-    for(j=0; j <interval_time*para; j++){
-      // HAL_Delay(1);
-      lv_task_handler();
-    }
+     HAL_Delay(interval_time);
 }
 //?????n???
 void ws281x_ShutoffPixel(uint16_t n)
@@ -292,12 +300,17 @@ void ws281x_ShutoffPixel(uint16_t n)
     }
   }
 	rgb_SendArray();
+  #ifdef OPT
+		HAL_Delay(10);
+		lv_task_handler();
+    #else
 	/* ???????????????? */
     // HAL_Delay(10);
     for(i=0; i <10*para; i++){
       // HAL_Delay(1);
       lv_task_handler();
     }
+  #endif
 }
 /**
  * @Description  	?????
@@ -314,20 +327,21 @@ void horse_race_lamp(uint16_t interval_time)
 		color = rand()%7;
 		set_pixel_rgb(i,color);//????
 		ws281x_ShutoffPixel(i-1);
+	  #ifdef OPT
+		HAL_Delay(interval_time);
+		lv_task_handler();
+    #else
 		/* ???????????????? */
     // HAL_Delay(interval_time);
     for(j=0; j <interval_time*para; j++){
       // HAL_Delay(1);
       lv_task_handler();
     }
+	  #endif
   }
 	ws281x_ShutoffPixel(Pixel_S1_NUM-1);
 	/* ???????????????? */
-    // HAL_Delay(interval_time);
-    for(j=0; j <interval_time*para; j++){
-      // HAL_Delay(1);
-      lv_task_handler();
-    }
+    HAL_Delay(interval_time);
 }
 
 /**
@@ -367,12 +381,17 @@ void ws2812_All_LED_one_Color_breath(uint16_t interval_time, uint32_t GRB_color)
 			ws2812_Set_one_LED_Color(j, ((rgb_color.G<<16) | (rgb_color.R<<8) | (rgb_color.B)));
 		}
 		rgb_SendArray();
+    #ifdef OPT
+		HAL_Delay(interval_time);
+		lv_task_handler();
+    #else
 		/* ???????????????? */
     // HAL_Delay(interval_time);
     for(k=0; k <interval_time*para; k++){
       // HAL_Delay(1);
       lv_task_handler();
     }
+    #endif
 	}
 	for(i=100;i>=1;i--){
 		__brightnessAdjust(i/100.0f, rgb_color);
@@ -381,11 +400,7 @@ void ws2812_All_LED_one_Color_breath(uint16_t interval_time, uint32_t GRB_color)
 		}
 		rgb_SendArray();
 		/* ???????????????? */
-    // HAL_Delay(interval_time);
-    for(k=0; k <interval_time*para; k++){
-      // HAL_Delay(1);
-      lv_task_handler();
-    }
+    HAL_Delay(interval_time);
 	}
 }
 void light_ctr(u8 light, uint32_t GRB_color){

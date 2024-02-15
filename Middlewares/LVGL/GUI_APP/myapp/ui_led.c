@@ -6,7 +6,7 @@
 // extern uint32_t led_red, led_green, led_blue, led_rgb;
 // extern unsigned char pitch_str[10], yaw_str[10], roll_str[10], temp_str[10];
 uint8_t led_mode, led_light, led_color, led_flag;
-uint32_t led_red, led_green, led_blue, led_rgb;
+uint32_t led_red = 0, led_green = 255, led_blue = 255, led_rgb;
 unsigned char pitch_str[10], yaw_str[10], roll_str[10], temp_str[10];
 
 static lv_obj_t *tabview;
@@ -66,15 +66,15 @@ static void lv_ctr_led(void)
     red_slider = create_slider(lv_palette_main(LV_PALETTE_RED));
     green_slider = create_slider(lv_palette_main(LV_PALETTE_GREEN));
     blue_slider = create_slider(lv_palette_main(LV_PALETTE_BLUE));
-    intense_slider = create_slider(lv_palette_main(LV_PALETTE_GREY));
+    // intense_slider = create_slider(lv_palette_main(LV_PALETTE_GREY));
     lv_slider_set_value(red_slider, LV_OPA_20, LV_ANIM_OFF);
     lv_slider_set_value(green_slider, LV_OPA_90, LV_ANIM_OFF);
     lv_slider_set_value(blue_slider, LV_OPA_60, LV_ANIM_OFF);
-    lv_slider_set_value(intense_slider, LV_OPA_0, LV_ANIM_OFF);
+    // lv_slider_set_value(intense_slider, LV_OPA_0, LV_ANIM_OFF);
     lv_obj_align(red_slider, LV_ALIGN_LEFT_MID, 40, 20);
     lv_obj_align_to(green_slider, red_slider, LV_ALIGN_OUT_RIGHT_MID, 20, 0);
     lv_obj_align_to(blue_slider, green_slider, LV_ALIGN_OUT_RIGHT_MID, 20, 0);
-    lv_obj_align_to(intense_slider, blue_slider, LV_ALIGN_OUT_RIGHT_MID, 20, 0);//    
+    // lv_obj_align_to(intense_slider, blue_slider, LV_ALIGN_OUT_RIGHT_MID, 20, 0);//    
 
 	// LV_IMG_DECLARE(led_img)
     // img1 = lv_img_create(tab1);
