@@ -33,6 +33,16 @@ static void roller_event_handler(lv_event_t * e);
 // 入口函数
 void ui_led_start(void)
 {
+	lv_color_t c = lv_palette_main(LV_PALETTE_BLUE);
+	lv_theme_t * th = lv_theme_default_init(lv_disp_get_default(),  /*Use the DPI, size, etc from this display*/ 
+                                        c, lv_color_white(),   /*Primary and secondary palette*/
+                                        true,    /*Light or dark mode*/ 
+                                         &lv_font_montserrat_22); /*Small, normal, large fonts*/
+								
+	th = lv_theme_mono_init(lv_disp_get_default(), true, &lv_font_montserrat_22);
+                                       
+	lv_disp_set_theme(NULL, th); /*Assign the theme to the display*/
+	
     tabview = lv_tabview_create(lv_scr_act(), LV_DIR_BOTTOM, 40);
 	
 	tab1 = lv_tabview_add_tab(tabview, "LED_CTR");
@@ -49,8 +59,8 @@ static void lv_ctr_led(void)
 	creat_switch();
 	creat_roller();
 
-    /* 颜色控制条 */
-    /*Create 4 sliders to adjust RGB color and re-color intensity*/
+
+//    /*Create 4 sliders to adjust RGB color and re-color intensity*/
     red_slider = create_slider(lv_palette_main(LV_PALETTE_RED));
     green_slider = create_slider(lv_palette_main(LV_PALETTE_GREEN));
     blue_slider = create_slider(lv_palette_main(LV_PALETTE_BLUE));
@@ -59,20 +69,15 @@ static void lv_ctr_led(void)
     lv_slider_set_value(green_slider, LV_OPA_90, LV_ANIM_OFF);
     lv_slider_set_value(blue_slider, LV_OPA_60, LV_ANIM_OFF);
     lv_slider_set_value(intense_slider, LV_OPA_0, LV_ANIM_OFF);
-    lv_obj_align(red_slider, LV_ALIGN_LEFT_MID, 60, 200);
+    lv_obj_align(red_slider, LV_ALIGN_LEFT_MID, 20, 50);
     lv_obj_align_to(green_slider, red_slider, LV_ALIGN_OUT_RIGHT_MID, 20, 0);
     lv_obj_align_to(blue_slider, green_slider, LV_ALIGN_OUT_RIGHT_MID, 20, 0);
-    lv_obj_align_to(intense_slider, blue_slider, LV_ALIGN_OUT_RIGHT_MID, 20, 0);
-	
+    lv_obj_align_to(intense_slider, blue_slider, LV_ALIGN_OUT_RIGHT_MID, 20, 0);//    /* 颜色控制条 */
+
 	LV_IMG_DECLARE(led_img)
     img1 = lv_img_create(tab1);
     lv_img_set_src(img1, &led_img);
-    lv_obj_align(img1, LV_ALIGN_CENTER, 100, 220);
-
-	static lv_style_t *style_img;
-	lv_style_init(style_img);
-    lv_style_set_radius(style_img, 50);
-	lv_obj_add_style(img1, style_img, LV_STATE_DEFAULT); 
+    lv_obj_align_to(img1,intense_slider, LV_ALIGN_OUT_RIGHT_MID, 30, 0);
 
     lv_event_send(intense_slider, LV_EVENT_VALUE_CHANGED, NULL);
 }
@@ -108,7 +113,7 @@ void creat_laber(void){
 void creat_switch(void)
 { 
     sw_Switch = lv_switch_create(tab1);
-	lv_obj_align_to(sw_Switch, tab1, LV_ALIGN_TOP_LEFT, 240, 60);
+	lv_obj_align_to(sw_Switch, tab1, LV_ALIGN_TOP_LEFT, 195, 60);
     lv_obj_add_event_cb(sw_Switch, sw_event_handler1, LV_EVENT_ALL, NULL);
 	
 	sw_RainbowLed = lv_switch_create(tab1);
@@ -158,7 +163,7 @@ void creat_roller(void)
 
     lv_roller_set_visible_row_count(roller1, 4);
     lv_obj_center(roller1);
-	lv_obj_align_to(roller1, tab1, LV_ALIGN_TOP_LEFT, 270, 100);
+	lv_obj_align_to(roller1, tab1, LV_ALIGN_TOP_LEFT, 265, 70);
 	
     lv_obj_add_event_cb(roller1, roller_event_handler, LV_EVENT_ALL, NULL);
 }
@@ -186,7 +191,7 @@ static void sw_event_handler2(lv_event_t * e){  // 彩虹灯
 			rainbowCycle(14);
 		}
         else{
-            ws2812_AllShutOff();
+           ws2812_AllShutOff();
         }
     }
 }
@@ -198,7 +203,7 @@ static void sw_event_handler3(lv_event_t * e){  // 流水灯
         if(lv_obj_has_state(obj, LV_STATE_CHECKED)){
 			Running_water_lamp(led_red, led_green, led_blue, 100);
 		}else{
-            ws2812_AllShutOff();
+           ws2812_AllShutOff();
         }
     }
 }
@@ -210,7 +215,7 @@ static void sw_event_handler4(lv_event_t * e){  // 跑马灯
         if(lv_obj_has_state(obj, LV_STATE_CHECKED)){
 			horse_race_lamp(100);
 		}else{
-            ws2812_AllShutOff();
+           ws2812_AllShutOff();
         }
     }
 }
@@ -222,7 +227,7 @@ static void sw_event_handler5(lv_event_t * e){  // 呼吸灯
         if(lv_obj_has_state(obj, LV_STATE_CHECKED)){
 			ws2812_All_LED_one_Color_breath(20, led_rgb);
 		}else{
-            ws2812_AllShutOff();
+           ws2812_AllShutOff();
         }
     }
 }
@@ -236,7 +241,7 @@ static void slider_event_cb(lv_event_t * e)  // 控制颜色
 	led_green = lv_slider_get_value(green_slider);
 	led_blue = lv_slider_get_value(blue_slider);
     led_rgb = (led_green << 16) | (led_red << 8) | led_blue;
-    light_ctr(led_light, led_rgb);
+   light_ctr(led_light, led_rgb);
 
     lv_color_t color  = lv_color_make(led_red, led_green, led_blue);
 	
@@ -254,10 +259,7 @@ static void roller_event_handler(lv_event_t * e)  // 颜色选择
         char buf[32];
         lv_roller_get_selected_str(obj, buf, sizeof(buf));
 		
-		if(!strcmp(buf, "Exit"))	led_flag = 0;
-		else led_flag = 1;
-		
-        if(!strcmp(buf, "Red"))		led_rgb = C_Red;
+       if(!strcmp(buf, "Red"))		led_rgb = C_Red;
 		if(!strcmp(buf, "Green"))	led_rgb = C_Green;
 		if(!strcmp(buf, "Blue"))	led_rgb = C_Blue;
 		if(!strcmp(buf, "Yellow"))	led_rgb = C_Yellow;
@@ -267,9 +269,9 @@ static void roller_event_handler(lv_event_t * e)  // 颜色选择
 		if(!strcmp(buf, "White"))	led_rgb = C_white;
         if(!strcmp(buf, "Exit"))
         {
-            ws2812_AllShutOff();  
+           ws2812_AllShutOff();  
         }else{
-            light_ctr(led_light, led_rgb);
+           light_ctr(led_light, led_rgb);
         }
     }
 }
