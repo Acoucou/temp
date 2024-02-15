@@ -3,6 +3,8 @@
 #include "./BSP/spi/spi.h"
 #include "lvgl.h"
 
+#define para 10    // ??lv_task_handler()??????100us?
+
 // Some Static Colors
 const RGBColor_TypeDef RED      = {255,0,0};
 const RGBColor_TypeDef GREEN    = {0,255,0};
@@ -130,9 +132,8 @@ void rainbowCycle(u16 Pixel_LEN){
     
     /* ???????????????? */
     // HAL_Delay(20);
-    for(i=0; i <20; i++){
-      HAL_Delay(1);
-      lv_task_handler();
+    for(i=0; i <20*para; i++){
+      lv_task_handler();  // if 100us? i=200
     }
   }
 }
@@ -265,16 +266,16 @@ void Running_water_lamp( uint8_t red ,uint8_t green ,uint8_t blue, uint16_t inte
 
     /* ???????????????? */
     // HAL_Delay(interval_time);
-    for(j=0; j <interval_time; j++){
-      HAL_Delay(1);
+    for(j=0; j <interval_time*para; j++){
+      // HAL_Delay(1);
       lv_task_handler();
     }
   }
 	ws2812_AllShutOff();
 	/* ???????????????? */
     // HAL_Delay(interval_time);
-    for(j=0; j <interval_time; j++){
-      HAL_Delay(1);
+    for(j=0; j <interval_time*para; j++){
+      // HAL_Delay(1);
       lv_task_handler();
     }
 }
@@ -293,8 +294,8 @@ void ws281x_ShutoffPixel(uint16_t n)
 	rgb_SendArray();
 	/* ???????????????? */
     // HAL_Delay(10);
-    for(i=0; i <10; i++){
-      HAL_Delay(1);
+    for(i=0; i <10*para; i++){
+      // HAL_Delay(1);
       lv_task_handler();
     }
 }
@@ -315,16 +316,16 @@ void horse_race_lamp(uint16_t interval_time)
 		ws281x_ShutoffPixel(i-1);
 		/* ???????????????? */
     // HAL_Delay(interval_time);
-    for(j=0; j <interval_time; j++){
-      HAL_Delay(1);
+    for(j=0; j <interval_time*para; j++){
+      // HAL_Delay(1);
       lv_task_handler();
     }
   }
 	ws281x_ShutoffPixel(Pixel_S1_NUM-1);
 	/* ???????????????? */
     // HAL_Delay(interval_time);
-    for(j=0; j <interval_time; j++){
-      HAL_Delay(1);
+    for(j=0; j <interval_time*para; j++){
+      // HAL_Delay(1);
       lv_task_handler();
     }
 }
@@ -368,8 +369,8 @@ void ws2812_All_LED_one_Color_breath(uint16_t interval_time, uint32_t GRB_color)
 		rgb_SendArray();
 		/* ???????????????? */
     // HAL_Delay(interval_time);
-    for(k=0; k <interval_time; k++){
-      HAL_Delay(1);
+    for(k=0; k <interval_time*para; k++){
+      // HAL_Delay(1);
       lv_task_handler();
     }
 	}
@@ -381,8 +382,8 @@ void ws2812_All_LED_one_Color_breath(uint16_t interval_time, uint32_t GRB_color)
 		rgb_SendArray();
 		/* ???????????????? */
     // HAL_Delay(interval_time);
-    for(k=0; k <interval_time; k++){
-      HAL_Delay(1);
+    for(k=0; k <interval_time*para; k++){
+      // HAL_Delay(1);
       lv_task_handler();
     }
 	}
