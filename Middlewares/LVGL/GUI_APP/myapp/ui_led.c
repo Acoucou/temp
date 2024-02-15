@@ -37,9 +37,9 @@ void ui_led_start(void)
 	lv_theme_t * th = lv_theme_default_init(lv_disp_get_default(),  /*Use the DPI, size, etc from this display*/ 
                                         c, lv_color_white(),   /*Primary and secondary palette*/
                                         true,    /*Light or dark mode*/ 
-                                         &lv_font_montserrat_22); /*Small, normal, large fonts*/
+                                         &lv_font_montserrat_26); /*Small, normal, large fonts*/
 								
-	th = lv_theme_mono_init(lv_disp_get_default(), true, &lv_font_montserrat_22);
+	th = lv_theme_mono_init(lv_disp_get_default(), true, &lv_font_montserrat_26);
                                        
 	lv_disp_set_theme(NULL, th); /*Assign the theme to the display*/
 	
@@ -59,7 +59,7 @@ static void lv_ctr_led(void)
 	creat_switch();
 	creat_roller();
 
-
+/* 颜色控制条 */
 //    /*Create 4 sliders to adjust RGB color and re-color intensity*/
     red_slider = create_slider(lv_palette_main(LV_PALETTE_RED));
     green_slider = create_slider(lv_palette_main(LV_PALETTE_GREEN));
@@ -72,14 +72,14 @@ static void lv_ctr_led(void)
     lv_obj_align(red_slider, LV_ALIGN_LEFT_MID, 20, 50);
     lv_obj_align_to(green_slider, red_slider, LV_ALIGN_OUT_RIGHT_MID, 20, 0);
     lv_obj_align_to(blue_slider, green_slider, LV_ALIGN_OUT_RIGHT_MID, 20, 0);
-    lv_obj_align_to(intense_slider, blue_slider, LV_ALIGN_OUT_RIGHT_MID, 20, 0);//    /* 颜色控制条 */
+    lv_obj_align_to(intense_slider, blue_slider, LV_ALIGN_OUT_RIGHT_MID, 20, 0);//    
 
-	LV_IMG_DECLARE(led_img)
-    img1 = lv_img_create(tab1);
-    lv_img_set_src(img1, &led_img);
-    lv_obj_align_to(img1,intense_slider, LV_ALIGN_OUT_RIGHT_MID, 30, 0);
+	// LV_IMG_DECLARE(led_img)
+    // img1 = lv_img_create(tab1);
+    // lv_img_set_src(img1, &led_img);
+    // lv_obj_align_to(img1,intense_slider, LV_ALIGN_OUT_RIGHT_MID, 30, 0);
 
-    lv_event_send(intense_slider, LV_EVENT_VALUE_CHANGED, NULL);
+    // lv_event_send(intense_slider, LV_EVENT_VALUE_CHANGED, NULL);
 }
 //创建标签
 void creat_laber(void){
@@ -259,7 +259,7 @@ static void roller_event_handler(lv_event_t * e)  // 颜色选择
         char buf[32];
         lv_roller_get_selected_str(obj, buf, sizeof(buf));
 		
-       if(!strcmp(buf, "Red"))		led_rgb = C_Red;
+        if(!strcmp(buf, "Red"))		led_rgb = C_Red;
 		if(!strcmp(buf, "Green"))	led_rgb = C_Green;
 		if(!strcmp(buf, "Blue"))	led_rgb = C_Blue;
 		if(!strcmp(buf, "Yellow"))	led_rgb = C_Yellow;
