@@ -18,6 +18,10 @@
 #include "ui.h"
 #include "ui_led.h"
 
+uint8_t led_mode, led_light, led_color, led_flag;
+uint32_t led_red = 0, led_green = 255, led_blue = 255, led_rgb;
+unsigned char pitch_str[10], yaw_str[10], roll_str[10], temp_str[10];
+
 int main(void)
 {
     HAL_Init();                         /* ��ʼ��HAL�� */
@@ -45,5 +49,32 @@ int main(void)
     while(1)
     {
         lv_task_handler();
+
+        
+        switch (led_mode)
+        {
+        case 0:
+            ws2812_AllShutOff();  
+            break;
+        case 1:
+            led_rgb = (led_green << 16) | (led_red << 8) | led_blue;
+            light_ctr(led_light, led_rgb);
+            break;
+        case 2:
+            rainbowCycle(14);
+            break;
+        case 3:
+            Running_water_lamp(led_red, led_green, led_blue, 100);
+            break;
+        case 4:
+            horse_race_lamp(100);
+            break;
+        case 5:
+            led_rgb = (led_green << 16) | (led_red << 8) | led_blue;
+            ws2812_All_LED_one_Color_breath(20, led_rgb);
+            break;
+        default:
+            break;
+        }
     }
 }

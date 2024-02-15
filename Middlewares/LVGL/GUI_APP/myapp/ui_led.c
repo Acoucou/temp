@@ -2,12 +2,10 @@
 #include "lvgl.h"
 #include "./BSP/ws2812/ws2812.h"
 
-// extern uint8_t led_mode, led_light, led_color, led_flag;
-// extern uint32_t led_red, led_green, led_blue, led_rgb;
-// extern unsigned char pitch_str[10], yaw_str[10], roll_str[10], temp_str[10];
-uint8_t led_mode, led_light, led_color, led_flag;
-uint32_t led_red = 0, led_green = 255, led_blue = 255, led_rgb;
-unsigned char pitch_str[10], yaw_str[10], roll_str[10], temp_str[10];
+extern uint8_t led_mode, led_light, led_color, led_flag;
+extern uint32_t led_red, led_green, led_blue, led_rgb;
+extern unsigned char pitch_str[10], yaw_str[10], roll_str[10], temp_str[10];
+
 
 static lv_obj_t *tabview;
 static lv_obj_t *tab1, *tab2, *tab3;
@@ -194,9 +192,9 @@ static void sw_event_handler1(lv_event_t * e)  // 开关
 
     if(code == LV_EVENT_VALUE_CHANGED) {
         if(lv_obj_has_state(obj, LV_STATE_CHECKED)){
-			light_ctr(led_light, led_rgb);
+			led_mode = 1;
 		}else{
-			ws2812_AllShutOff();
+			led_mode = 0;
 		}
     }
 }
@@ -206,11 +204,10 @@ static void sw_event_handler2(lv_event_t * e){  // 彩虹灯
 
     if(code == LV_EVENT_VALUE_CHANGED) {
         if(lv_obj_has_state(obj, LV_STATE_CHECKED)){
-			rainbowCycle(14);
+            led_mode = 2;
+		}else{
+			led_mode = 0;
 		}
-        else{
-           ws2812_AllShutOff();
-        }
     }
 }
 static void sw_event_handler3(lv_event_t * e){  // 流水灯
@@ -219,10 +216,11 @@ static void sw_event_handler3(lv_event_t * e){  // 流水灯
 
     if(code == LV_EVENT_VALUE_CHANGED) {
         if(lv_obj_has_state(obj, LV_STATE_CHECKED)){
-			Running_water_lamp(led_red, led_green, led_blue, 100);
+            led_mode = 3;
+			
 		}else{
-           ws2812_AllShutOff();
-        }
+			led_mode = 0;
+		}
     }
 }
 static void sw_event_handler4(lv_event_t * e){  // 跑马灯
@@ -231,10 +229,11 @@ static void sw_event_handler4(lv_event_t * e){  // 跑马灯
 
     if(code == LV_EVENT_VALUE_CHANGED) {
         if(lv_obj_has_state(obj, LV_STATE_CHECKED)){
-			horse_race_lamp(100);
+            led_mode = 4;
+			
 		}else{
-           ws2812_AllShutOff();
-        }
+			led_mode = 0;
+		}
     }
 }
 static void sw_event_handler5(lv_event_t * e){  // 呼吸灯
@@ -243,10 +242,11 @@ static void sw_event_handler5(lv_event_t * e){  // 呼吸灯
 
     if(code == LV_EVENT_VALUE_CHANGED) {
         if(lv_obj_has_state(obj, LV_STATE_CHECKED)){
-			ws2812_All_LED_one_Color_breath(20, led_rgb);
+            led_mode = 5;
+			
 		}else{
-           ws2812_AllShutOff();
-        }
+			led_mode = 0;
+		}
     }
 }
 
@@ -258,7 +258,6 @@ static void slider_event_cb(lv_event_t * e)  // 控制颜色
 	led_red = lv_slider_get_value(red_slider);
 	led_green = lv_slider_get_value(green_slider);
 	led_blue = lv_slider_get_value(blue_slider);
-    led_rgb = (led_green << 16) | (led_red << 8) | led_blue;
 
     lv_color_t color  = lv_color_make(led_red, led_green, led_blue);
 	
@@ -266,7 +265,7 @@ static void slider_event_cb(lv_event_t * e)  // 控制颜色
     // lv_obj_set_style_img_recolor_opa(img1, intense, 0);
     // lv_obj_set_style_img_recolor(img1, color, 0);
 
-    light_ctr(led_light, led_rgb);
+    led_mode = 1;
 }
 
 static void roller_event_handler(lv_event_t * e)  // 颜色选择
@@ -288,8 +287,9 @@ static void roller_event_handler(lv_event_t * e)  // 颜色选择
 		if(!strcmp(buf, "White"))	led_rgb = C_white;
         if(!strcmp(buf, "Exit"))
         {
-           ws2812_AllShutOff();  
+           led_mode = 0; 
         }else{
+           led_mode = 6;
            light_ctr(led_light, led_rgb);
         }
     }
