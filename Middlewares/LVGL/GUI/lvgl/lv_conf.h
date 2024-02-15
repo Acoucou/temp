@@ -563,7 +563,7 @@
 #if LV_USE_THEME_DEFAULT
 
     /* 0:浅色模式，1:深色模式 */
-    #define LV_THEME_DEFAULT_DARK           0
+    #define LV_THEME_DEFAULT_DARK           1
 
     /* 1:启用按下增长 */
     #define LV_THEME_DEFAULT_GROW           1

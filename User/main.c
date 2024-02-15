@@ -20,25 +20,25 @@
 
 int main(void)
 {
-    HAL_Init();                         /* ³õÊ¼»¯HAL¿â */
-    sys_stm32_clock_init(RCC_PLL_MUL9); /* ÉèÖÃÊ±ÖÓ, 72Mhz */
-    delay_init(72);                     /* ÑÓÊ±³õÊ¼»¯ */
-    usart_init(115200);                 /* ´®¿Ú³õÊ¼»¯Îª115200 */
-    usmart_dev.init(72);                /* ³õÊ¼»¯USMART */
-    led_init();                         /* ³õÊ¼»¯LED */
-    lcd_init();                         /* ³õÊ¼»¯LCD */
-    key_init();                         /* ³õÊ¼»¯°´¼ü */
-    my_mem_init(SRAMIN);                /* ³õÊ¼»¯ÄÚ²¿SRAMÄÚ´æ³Ø */
-    tp_dev.init();                      /* ´¥ÃþÆÁ³õÊ¼»¯ */
-    btim_timx_int_init(10-1,7200-1);    /* ³õÊ¼»¯¶¨Ê±Æ÷ */
+    HAL_Init();                         /* ï¿½ï¿½Ê¼ï¿½ï¿½HALï¿½ï¿½ */
+    sys_stm32_clock_init(RCC_PLL_MUL9); /* ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½, 72Mhz */
+    delay_init(72);                     /* ï¿½ï¿½Ê±ï¿½ï¿½Ê¼ï¿½ï¿½ */
+    usart_init(115200);                 /* ï¿½ï¿½ï¿½Ú³ï¿½Ê¼ï¿½ï¿½Îª115200 */
+    usmart_dev.init(72);                /* ï¿½ï¿½Ê¼ï¿½ï¿½USMART */
+    led_init();                         /* ï¿½ï¿½Ê¼ï¿½ï¿½LED */
+    lcd_init();                         /* ï¿½ï¿½Ê¼ï¿½ï¿½LCD */
+    key_init();                         /* ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
+    my_mem_init(SRAMIN);                /* ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½Ú²ï¿½SRAMï¿½Ú´ï¿½ï¿½ */
+    tp_dev.init();                      /* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ */
+    btim_timx_int_init(10-1,7200-1);    /* ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ */
 	
 	WS2812B_Init();
 
-    lv_init();                          /* lvglÏµÍ³³õÊ¼»¯ */
-    lv_port_disp_init();                /* lvglÏÔÊ¾½Ó¿Ú³õÊ¼»¯,·ÅÔÚlv_init()µÄºóÃæ */
-    lv_port_indev_init();               /* lvglÊäÈë½Ó¿Ú³õÊ¼»¯,·ÅÔÚlv_init()µÄºóÃæ */
+    lv_init();                          /* lvglÏµÍ³ï¿½ï¿½Ê¼ï¿½ï¿½ */
+    lv_port_disp_init();                /* lvglï¿½ï¿½Ê¾ï¿½Ó¿Ú³ï¿½Ê¼ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½lv_init()ï¿½Äºï¿½ï¿½ï¿½ */
+    lv_port_indev_init();               /* lvglï¿½ï¿½ï¿½ï¿½Ó¿Ú³ï¿½Ê¼ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½lv_init()ï¿½Äºï¿½ï¿½ï¿½ */
     
-    //lv_demo_stress();                   /* lvgl¹Ù·½Àý³Ì */
+    //lv_demo_stress();                   /* lvglï¿½Ù·ï¿½ï¿½ï¿½ï¿½ï¿½ */
 	//ui_init();
 	ui_led_start();
 	

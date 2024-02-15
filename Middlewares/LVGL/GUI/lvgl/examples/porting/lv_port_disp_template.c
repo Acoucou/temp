@@ -177,7 +177,7 @@ static void disp_init(void)
 {
     /*You code here*/
     lcd_init();         /* ≥ı ºªØLCD */
-    lcd_display_dir(1); /* …Ë÷√∫·∆¡ */
+    lcd_display_dir(0); /* …Ë÷√∫·∆¡ */
 }
 
 /**

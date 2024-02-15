@@ -33,16 +33,23 @@ static void roller_event_handler(lv_event_t * e);
 // 入口函数
 void ui_led_start(void)
 {
-	lv_color_t c = lv_palette_main(LV_PALETTE_BLUE);
-	lv_theme_t * th = lv_theme_default_init(lv_disp_get_default(),  /*Use the DPI, size, etc from this display*/ 
-                                        c, lv_color_white(),   /*Primary and secondary palette*/
-                                        true,    /*Light or dark mode*/ 
-                                         &lv_font_montserrat_26); /*Small, normal, large fonts*/
+    lv_theme_t * th;
+    /* test 01 */
+	// th = lv_theme_default_init(lv_disp_get_default(),  /*Use the DPI, size, etc from this display*/ 
+    //                                     lv_palette_main(LV_PALETTE_BLUE), lv_color_white(),   /*Primary and secondary palette*/
+    //                                     true,    /*Light or dark mode*/ 
+    //                                      &lv_font_montserrat_14); /*Small, normal, large fonts*/
 								
-	th = lv_theme_mono_init(lv_disp_get_default(), true, &lv_font_montserrat_26);
-                                       
-	lv_disp_set_theme(NULL, th); /*Assign the theme to the display*/
-	
+	/* test 02 */
+    th = lv_theme_mono_init(lv_disp_get_default(), true, &lv_font_montserrat_14);
+
+    /* test 03 */
+    // th = lv_theme_basic_init(lv_disp_get_default(), true, &lv_font_montserrat_14);
+
+
+	lv_disp_set_theme(lv_disp_get_default(), th); /*Assign the theme to the display*/
+
+
     tabview = lv_tabview_create(lv_scr_act(), LV_DIR_BOTTOM, 40);
 	
 	tab1 = lv_tabview_add_tab(tabview, "LED_CTR");
